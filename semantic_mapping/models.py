@@ -89,12 +89,12 @@ class Building(models.Model):
     updated_on = models.DateTimeField(editable=False)
 
     class Meta:
-        verbose_name = _('Place')
-        verbose_name_plural = _('Places')
+        verbose_name = _('Building')
+        verbose_name_plural = _('Buildings')
 
     @models.permalink
     def get_absolute_url(self):
-            return ('places-detail', [self.slug])
+            return ('name', [self.slug])
 
     def __unicode__(self):
         return self.name

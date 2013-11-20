@@ -11,6 +11,7 @@ urlpatterns = patterns('',
                        # url(r'^blog/', include('blog.urls')),
                        (r'^grappelli/', include('grappelli.urls')), # grappelli URLS
                        url(r'^', include('snippets.urls')),
+                       url(r'', include('semantic_mapping.urls')),
                        url(r'^admin/', include(admin.site.urls)),
 
 )
