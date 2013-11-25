@@ -1,9 +1,5 @@
 # rest_framework_gis/fields.py
-
-try:
-    import simplejson
-except ImportError:
-    import json
+import json
 
 from django.contrib.gis.geos import GEOSGeometry, GEOSException
 from django.contrib.gis.gdal import OGRException

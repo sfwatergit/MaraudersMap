@@ -4,7 +4,7 @@ from django.core.exceptions import ImproperlyConfigured
 
 from rest_framework.serializers import ModelSerializer, ModelSerializerOptions
 
-from .fields import GeometryField
+from .geo_fields import GeometryField
 
 
 class GeoModelSerializer(ModelSerializer):

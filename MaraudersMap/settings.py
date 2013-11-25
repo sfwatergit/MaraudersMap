@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 STATIC_ROOT = 'static/'
@@ -53,8 +54,8 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = (
     'grappelli',
-    'django.contrib.admin',
     'django.contrib.auth',
+    'django.contrib.admin',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -63,11 +64,15 @@ INSTALLED_APPS = (
     'django.contrib.gis',
     'south',
     #'semantic_mapping',
+    'marmap_users',
+    'semantic_mapping',
+    #third party other than grappelli and south
     'rest_framework',
     'rest_framework_swagger',
     'django_extensions',
     'model_utils',
-    'semantic_mapping'
+    'model_mommy',
+
 
 )
 
@@ -78,7 +83,6 @@ TEMPLATE_LOADERS = (
     'apptemplates.Loader',
 )
 
-
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -86,6 +90,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
 )
 
 ROOT_URLCONF = 'MaraudersMap.urls'
@@ -120,8 +125,12 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+#Naive Timezone setting is allowed only w/ PostgreSQL!!!!!!
+USE_TZ = False
 
 GRAPPELLI_ADMIN_TITLE = 'Marauder\'s Map Admin'
+
+
+
 
 

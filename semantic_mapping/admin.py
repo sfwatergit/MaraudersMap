@@ -7,10 +7,9 @@ class BuildingAdmin(admin.ModelAdmin):
     list_display = ('name', 'position', 'city', 'street', 'added_on', 'updated_on')
 
 
+
+
 admin.site.register(Building)
 admin.site.register(Floor)
 admin.site.register(Room)
-admin.site.register(MobUserProfile)
-admin.site.register(MobUserState)
-admin.site.register(LocationFix)
-admin.site.register(LocationFixSource)
+

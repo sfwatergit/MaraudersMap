@@ -1,17 +1,31 @@
 from django.conf.urls import patterns, url
+from semantic_mapping import views
 
 urlpatterns = patterns('semantic_mapping.views',
-                       # geojson
-                       url(r'^geojson/$', 'geojson_location_list',
-                           name='api_geojson_location_list'),
-                       url(r'^geojson/(?P<pk>[0-9]+)/$',
-                           'geojson_location_details',
-                           name='api_geojson_location_details'),
-                       # Filters
-                       url(r'^filters/contained_in_bbox$',
-                           'geojson_location_contained_in_bbox_list',
-                           name='api_geojson_building_list_contained_in_bbox_filter'),
-                       url(r'^filters/overlaps_bbox$',
-                           'geojson_location_overlaps_bbox_list',
-                           name='api_geojson_building_list_overlaps_bbox_filter'),
-)
+
+
+                       url(r'^buildings/$',
+                           'building_list',
+                           name='api_building-list'),
+
+                       url(r'^buildings/(?P<name>[-\w]+)/$',
+                           'building_details',
+                           name='api_building-details'),
+
+                       url(r'^buildings/(?P<name>[-\w+]+)/floors/$',
+                           'floor_list',
+                           name='api_floor-list'),
+
+                       url(r'^buildings/(?P<name>[-\w]+)/floors/(?P<level>[0-9]+)/$',
+                           'floor_details',
+                           name='api_floor-details'),
+                       url(r'^buildings/(?P<name>[-\w]+)/floors/(?P<level>[0-9]+)/rooms$',
+                           'room_list',
+                           name='api_room-list'),
+
+                       url(r'^buildings/(?P<name>[-\w]+)/floors/(?P<level>[0-9]+)/rooms/(?P<room_number>[0-9]+)/',
+                           'room_details',
+                           name='api_room-details'),
+                       )
+
+
