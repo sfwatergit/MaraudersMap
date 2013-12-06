@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import datetime
+from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
@@ -15,7 +15,7 @@ class Migration(SchemaMigration):
             ('street', self.gf('django.db.models.fields.CharField')(max_length=250, blank=True)),
             ('postal_code', self.gf('django.db.models.fields.CharField')(max_length=25, blank=True)),
             ('city', self.gf('django.db.models.fields.CharField')(max_length=100, blank=True)),
-            ('position', self.gf('django.contrib.gis.db.models.fields.PointField')(null=True, blank=True)),
+            ('geom', self.gf('django.contrib.gis.db.models.fields.PointField')(null=True, blank=True)),
         ))
         db.send_create_signal(u'semantic_mapping', ['Building'])
 
@@ -24,7 +24,7 @@ class Migration(SchemaMigration):
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('building', self.gf('django.db.models.fields.related.ForeignKey')(related_name='floors', to=orm['semantic_mapping.Building'])),
             ('level', self.gf('django.db.models.fields.IntegerField')(max_length=5)),
-            ('poly', self.gf('django.contrib.gis.db.models.fields.PolygonField')(null=True, blank=True)),
+            ('geom', self.gf('django.contrib.gis.db.models.fields.PolygonField')(null=True, blank=True)),
         ))
         db.send_create_signal(u'semantic_mapping', ['Floor'])
 
@@ -32,8 +32,8 @@ class Migration(SchemaMigration):
         db.create_table(u'semantic_mapping_room', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('floor', self.gf('django.db.models.fields.related.ForeignKey')(related_name='rooms', to=orm['semantic_mapping.Floor'])),
-            ('room_number', self.gf('django.db.models.fields.SlugField')(max_length=50)),
-            ('poly', self.gf('django.contrib.gis.db.models.fields.PolygonField')(null=True, blank=True)),
+            ('room', self.gf('django.db.models.fields.CharField')(max_length=100, null=True)),
+            ('geom', self.gf('django.contrib.gis.db.models.fields.PolygonField')(null=True, blank=True)),
         ))
         db.send_create_signal(u'semantic_mapping', ['Room'])
 
@@ -53,25 +53,25 @@ class Migration(SchemaMigration):
         u'semantic_mapping.building': {
             'Meta': {'object_name': 'Building'},
             'city': ('django.db.models.fields.CharField', [], {'max_length': '100', 'blank': 'True'}),
+            'geom': ('django.contrib.gis.db.models.fields.PointField', [], {'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
-            'position': ('django.contrib.gis.db.models.fields.PointField', [], {'null': 'True', 'blank': 'True'}),
             'postal_code': ('django.db.models.fields.CharField', [], {'max_length': '25', 'blank': 'True'}),
             'street': ('django.db.models.fields.CharField', [], {'max_length': '250', 'blank': 'True'})
         },
         u'semantic_mapping.floor': {
             'Meta': {'object_name': 'Floor'},
             'building': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'floors'", 'to': u"orm['semantic_mapping.Building']"}),
+            'geom': ('django.contrib.gis.db.models.fields.PolygonField', [], {'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'level': ('django.db.models.fields.IntegerField', [], {'max_length': '5'}),
-            'poly': ('django.contrib.gis.db.models.fields.PolygonField', [], {'null': 'True', 'blank': 'True'})
+            'level': ('django.db.models.fields.IntegerField', [], {'max_length': '5'})
         },
         u'semantic_mapping.room': {
             'Meta': {'object_name': 'Room'},
             'floor': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'rooms'", 'to': u"orm['semantic_mapping.Floor']"}),
+            'geom': ('django.contrib.gis.db.models.fields.PolygonField', [], {'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'poly': ('django.contrib.gis.db.models.fields.PolygonField', [], {'null': 'True', 'blank': 'True'}),
-            'room_number': ('django.db.models.fields.SlugField', [], {'max_length': '50'})
+            'room': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True'})
         }
     }
 

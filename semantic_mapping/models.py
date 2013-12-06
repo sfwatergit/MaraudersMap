@@ -3,25 +3,16 @@
 Note that the only dynamic (i.e., regularly updating) fields are located on
 the location_fix and mob_user.
 """
-from datetime import datetime
 
-from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
-from django.db.models import permalink
 from django.utils.text import slugify
-from django_states.models import StateModel
-from model_utils import Choices, FieldTracker
 from django.contrib.gis.db import models
 from django.utils.translation import ugettext_lazy as _
-from model_utils.fields import StatusField, MonitorField
-from MaraudersMap.settings import MEDIA_URL
-
 
 
 class Building(models.Model):
     """Buildings have several Floors. The building may have a specific
-    address. We won't be assigning spatial data here, but we will aggregate info
-     on buildings.
+    address.
 
     """
     name = models.CharField(_("Name"), max_length=200)
@@ -29,10 +20,8 @@ class Building(models.Model):
     postal_code = models.CharField(_("Postal code"), blank=True,
                                    max_length=25)
     city = models.CharField(_("City"), blank=True, max_length=100)
-
-    position = models.PointField(_("Position"), srid=4326, blank=True,
+    geom = models.PointField(_("Position"), srid=4326, blank=True,
                                  null=True)
-
 
     class Meta:
         verbose_name = _('Building')
@@ -51,28 +40,34 @@ class Floor(models.Model):
     the map."""
     building = models.ForeignKey(Building, related_name='floors')
     level = models.IntegerField(max_length=5)
-    poly = models.PolygonField(srid=4326, null=True, blank=True)
+    geom = models.PolygonField(srid=4326, null=True, blank=True)
     objects = models.GeoManager()
 
     def getGeometry(self):
         return self.poly
+
+    def __unicode__(self):
+        return u'Level: %s' % self.level
 
 
 class Room(models.Model):
     """A room may have many MobUsers.
     We will be representing each Room with a polygon."""
     floor = models.ForeignKey(Floor, related_name='rooms')
-    room_number = models.CharField(max_length=100, null=True)
-    poly = models.PolygonField(srid=4326, null=True, blank=True)
+    room = models.CharField(max_length=100, null=True)
+    geom = models.PolygonField(srid=4326, null=True, blank=True)
 
     objects = models.GeoManager()
 
+
     def getGeometry(self):
-        return self.poly
+        return self.geom
+
+    def __unicode__(self):
+        return u'Room: %s' % self.room
 
 
 from south.modelsinspector import add_introspection_rules
-
 add_introspection_rules([],
     ["^django\.contrib\.gis\.db\.models\.fields\.PointField"])
 

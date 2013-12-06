@@ -11,21 +11,35 @@ https://docs.djangoproject.com/en/1.6/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 
+DEBUG=True
+
+#DEBUG_TOOLBAR_PATCH_SETTINGS = False
+
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-STATIC_ROOT = 'static/'
+STATIC_ROOT = '/sid-static/'
 
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'django.contrib.staticfiles.finders.FileSystemFinder',
 
 )
+SERIALIZATION_MODULES = {
+    'geojson': 'djgeojson.serializers'
+}
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',),
+    'PAGINATE_BY': 10
+}
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.6/howto/static-files/
-STATIC_URL = '/static/'
+STATIC_URL = '/sid-static/'
 
-STATIC_PATH = os.path.join(BASE_DIR, 'static')
+STATIC_PATH = os.path.join(BASE_DIR, 'sid-static')
 
 STATICFILES_DIRS = (
     STATIC_PATH,
@@ -36,8 +50,7 @@ SECRET_KEY = '5g7zxeai=ecncq5rmxm2+nl$a!xqmhwihmtmdauz-u3(fu_9p1'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media') # Absolute path to the media directory
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+
 
 TEMPLATE_DEBUG = True
 TEMPLATE_PATH = os.path.join(BASE_DIR, 'templates')
@@ -62,17 +75,26 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     'django.contrib.gis',
+    'olwidget',
     'south',
     #'semantic_mapping',
     'marmap_users',
     'semantic_mapping',
+    'app',
+
     #third party other than grappelli and south
     'rest_framework',
     'rest_framework_swagger',
     'django_extensions',
     'model_utils',
-    'model_mommy',
+    'djgeojson',
+    'django_filters',
+    'leaflet',
 
+    #Testing and dev.:
+    'viewtools',
+ #   'debug_toolbar',
+    'model_mommy',
 
 )
 
@@ -90,6 +112,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+   # 'debug_toolbar.middleware.DebugToolbarMiddleware',
 
 )
 
@@ -97,9 +120,6 @@ ROOT_URLCONF = 'MaraudersMap.urls'
 
 WSGI_APPLICATION = 'MaraudersMap.wsgi.application'
 
-REST_FRAMEWORK = {
-    'PAGINATE_BY': 10
-}
 
 
 # Database
@@ -110,7 +130,7 @@ DATABASES = {
         'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': 'maraudersmap',
         'USER': 'harry',
-        'PASSWORD': 'dissendium',
+        'PASSWORD': 'harry',
     }
 }
 
@@ -129,6 +149,7 @@ USE_L10N = True
 USE_TZ = False
 
 GRAPPELLI_ADMIN_TITLE = 'Marauder\'s Map Admin'
+
 
 
 

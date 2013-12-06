@@ -1,9 +1,11 @@
+import datetime
 from django.contrib.auth.models import User
 from django.db import models
 from model_utils import Choices, FieldTracker
 from model_utils.fields import StatusField, MonitorField
+from MaraudersMap import settings
 
-
+last_online_duration = getattr(settings, 'LAST_ONLINE_DURATION', 900)
 
 class LocationFix(models.Model):
     """This is concrete location data updated directly from the relevant
@@ -17,9 +19,9 @@ class LocationFix(models.Model):
     >>> a.room = '204'
     >>> a.current_fix.previous('title')
     """
-    STRATAGEMS = Choices('SMT', 'ML')
+    STRATAGEMS = Choices('SMT', 'ML', 'User-Validated')
     #User-specific
-    uuid = models.CharField(max_length=32, unique=True)
+    uuid = models.CharField(max_length=32)
     epoch = models.DateTimeField()
     #Location-specific
     country = models.CharField(max_length=32)
@@ -41,37 +43,40 @@ class LocationFix(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     updated_on = models.DateTimeField(auto_now=True)
 
-
-    @property
     def __unicode__(self):
-        """
-        :rtype : object
-        """
-        return "%s" % self.uuid
+        return self.building
+
+    class Meta:
+        unique_together = (("building", "epoch", "floor", "room", "uuid"),)
+
+
+class MobUserManager(models.Manager):
+    def onlines(self):
+        now = datetime.now()
+        return MobUserStatus.objects.filter( \
+            updated_on__gte=now - datetime.timedelta(seconds=last_online_duration) \
+            )
+
+    def online_users(self):
+        return self.onlines().filter(user__isnull=False)
 
 class MobUserStatus(models.Model):
     """They may be in one of many Rooms in a Building. The
     location is tied to the device_id
     """
     #TODO: Need to make sure that only owner objects are updated in serializer
+    user = models.OneToOneField(User, related_name='status_of')
     STATUS = Choices('online', 'offline')
     status = StatusField()
-    location_fix = models.OneToOneField(LocationFix, to_field='uuid', related_name='location_of')
+    location_fix = models.ForeignKey(LocationFix, related_name='of_user', to_field='id')
+
     status_changed = MonitorField(monitor='status')
     location_changed = FieldTracker(fields=['location_fix'])
 
-    def __unicode__(self):
-        return self.status_of.user.username
+    objects = MobUserManager()
 
-
-class MobUserProfile(models.Model):
-    """These are the user profiles of
-     participants visualized on the Map. Consider using custom avatars.
-
-    """
-    user = models.OneToOneField(User, related_name="profile")
-    user_status = models.OneToOneField(MobUserStatus, null=True, related_name='status_of')
-
-    def __unicode__(self):
-        return self.user.username
-
+    def online(self):
+        now = datetime.now()
+        if (now - self.status_changed).seconds < last_online_duration:
+            return True
+        return False

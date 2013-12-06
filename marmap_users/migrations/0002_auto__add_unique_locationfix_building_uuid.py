@@ -8,42 +8,13 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
-        # Adding model 'LocationFix'
-        db.create_table(u'marmap_users_locationfix', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('uuid', self.gf('django.db.models.fields.CharField')(max_length=32)),
-            ('epoch', self.gf('django.db.models.fields.DateTimeField')()),
-            ('country', self.gf('django.db.models.fields.CharField')(max_length=32)),
-            ('state', self.gf('django.db.models.fields.CharField')(max_length=32)),
-            ('city', self.gf('django.db.models.fields.CharField')(max_length=32)),
-            ('street', self.gf('django.db.models.fields.CharField')(max_length=32)),
-            ('building', self.gf('django.db.models.fields.CharField')(max_length=32)),
-            ('floor', self.gf('django.db.models.fields.CharField')(max_length=5)),
-            ('room', self.gf('django.db.models.fields.CharField')(max_length=25)),
-            ('strategy', self.gf('django.db.models.fields.CharField')(default='ML', max_length=5)),
-            ('confidence', self.gf('django.db.models.fields.IntegerField')(default=0, null=True, blank=True)),
-            ('created_on', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('updated_on', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
-        ))
-        db.send_create_signal(u'marmap_users', ['LocationFix'])
-
-        # Adding model 'MobUserStatus'
-        db.create_table(u'marmap_users_mobuserstatus', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.OneToOneField')(related_name='profile', unique=True, to=orm['auth.User'])),
-            ('status', self.gf('model_utils.fields.StatusField')(default='online', max_length=100, no_check_for_status=True)),
-            ('location_fix', self.gf('django.db.models.fields.related.ForeignKey')(related_name='location_of', to=orm['marmap_users.LocationFix'])),
-            ('status_changed', self.gf('model_utils.fields.MonitorField')(default=datetime.datetime.now, monitor='status')),
-        ))
-        db.send_create_signal(u'marmap_users', ['MobUserStatus'])
+        # Adding unique constraint on 'LocationFix', fields ['building', 'uuid']
+        db.create_unique(u'marmap_users_locationfix', ['building', 'uuid'])
 
 
     def backwards(self, orm):
-        # Deleting model 'LocationFix'
-        db.delete_table(u'marmap_users_locationfix')
-
-        # Deleting model 'MobUserStatus'
-        db.delete_table(u'marmap_users_mobuserstatus')
+        # Removing unique constraint on 'LocationFix', fields ['building', 'uuid']
+        db.delete_unique(u'marmap_users_locationfix', ['building', 'uuid'])
 
 
     models = {
@@ -84,7 +55,7 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
         u'marmap_users.locationfix': {
-            'Meta': {'object_name': 'LocationFix'},
+            'Meta': {'unique_together': "(('building', 'uuid'),)", 'object_name': 'LocationFix'},
             'building': ('django.db.models.fields.CharField', [], {'max_length': '32'}),
             'city': ('django.db.models.fields.CharField', [], {'max_length': '32'}),
             'confidence': ('django.db.models.fields.IntegerField', [], {'default': '0', 'null': 'True', 'blank': 'True'}),

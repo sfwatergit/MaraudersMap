@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load leaflet_tags %}
+{% block head %}
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+{% leaflet_css %}
+    {% leaflet_js %}
+{% endblock %}
+{% block filter_box %}
+    <div id="filter-box">
+        <div>
+            <form id="map-search" method="get">
+                <label for="search">Search</label>
+                <input type="text" id="search" name="search"/>
+                <input type="submit" value="Search" id="submit-map-search"/>
+            </form>
+        </div>
+        <div id="search-results">
+            <div id="errors"></div>
+            <div id="counties"></div>
+            <div id="places"></div>
+        </div>
+        <div id="filter-layers">
+            <label id="buildings_select" for="buildings">Buildings</label>
+            <select name="buildings">
+                <option value="soda_hall" selected>Soda Hall</option>
+                <option value="cory_hall">Cory Hall</option>
+                <option value="etcheverry">Etcheverry</option>
+            </select>
+            <label for="floors">Floors</label>
+            <select id="floors_select" name="floors">
+                <option value="floor1">1</option>
+                <option value="floor2">2</option>
+                <option value="floor3" selected>3</option>
+            </select>
+        </div>
+
+    </div>
+
+{% endblock %}
+{% block before_body_close %}
+
+        {% leaflet_map "main"  callback="main_map_init" %}
+    <script>
+        function main_map_init(map, options)
+    {
+
+        var dataurl = '{% url "rooms" %}';
+        // Download GeoJSON via Ajax
+        $.getJSON(dataurl, function (data) {
+            // Add GeoJSON layer
+            L.geoJson(data).addTo(map);
+        });
+
+        dataurl = '{% url "floors" %}';
+        $.getJSON(dataurl, function (data) {
+            // Add GeoJSON layer
+            L.geoJson(data).addTo(map);
+        });
+
+    }
+    </script>
+{% endblock %}
