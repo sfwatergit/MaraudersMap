@@ -46,8 +46,12 @@ class LocationFix(models.Model):
     def __unicode__(self):
         return self.building
 
+
     class Meta:
         unique_together = (("building", "epoch", "floor", "room", "uuid"),)
+
+
+
 
 
 class MobUserManager(models.Manager):
@@ -59,6 +63,8 @@ class MobUserManager(models.Manager):
 
     def online_users(self):
         return self.onlines().filter(user__isnull=False)
+
+
 
 class MobUserStatus(models.Model):
     """They may be in one of many Rooms in a Building. The

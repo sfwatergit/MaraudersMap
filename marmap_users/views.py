@@ -22,7 +22,7 @@ class LocationViewSet(viewsets.ModelViewSet):
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    lookup_field='id'
+    lookup_field = 'id'
 
 
 userdetail = UserViewSet.as_view()
