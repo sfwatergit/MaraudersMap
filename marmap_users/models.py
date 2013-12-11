@@ -75,7 +75,6 @@ class MobUserStatus(models.Model):
     STATUS = Choices('online', 'offline')
     status = StatusField()
     location_fix = models.ForeignKey(LocationFix, related_name='of_user', to_field='id')
-
     status_changed = MonitorField(monitor='status')
     location_changed = FieldTracker(fields=['location_fix'])
 

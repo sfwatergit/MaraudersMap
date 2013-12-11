@@ -1,13 +1,15 @@
 from django.contrib.auth.models import User
+from django.db.models import Q
 from rest_framework import generics, viewsets
 from marmap_users.models import LocationFix, MobUserStatus
-from marmap_users.user_serializers import MobUserStatusSerializer, LocationSerializer, UserSerializer
+from marmap_users.user_serializers import MobUserStatusSerializer, LocationSerializer, UserSerializer, OnlineUserSerializer
 import django_filters
+
 
 class OnlineUserFilter(django_filters.FilterSet):
     class Meta:
         model = MobUserStatus
-        fields=['location_fix', 'status', 'status_changed']
+        fields = ['location_fix', 'status', 'status_changed']
 
 
 class LocationViewSet(viewsets.ModelViewSet):
@@ -47,9 +49,19 @@ class LocationFixDetailView(generics.RetrieveUpdateAPIView):
 locationfix = LocationFixDetailView.as_view()
 
 
-class FloorUserViewSet(viewsets.ModelViewSet):
-    model = LocationFix
-    lookup_field = 'uuid'
+class OnlineUserView(generics.ListAPIView):
+
+    serializer_class = OnlineUserSerializer
+
+    def get_queryset(self):
+        return User.objects.filter(Q(status_of__status='online') & Q(Q(status_of__location_fix__floor=str(self
+        .kwargs['floor'])) & Q(
+            status_of__location_fix__building=str(self.kwargs['building']))))
+
+onlineusers = OnlineUserView.as_view()
+
+
+
 
 
 

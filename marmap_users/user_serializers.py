@@ -26,6 +26,15 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         lookup_field = 'id'
 
 
+class OnlineUserSerializer(serializers.HyperlinkedModelSerializer):
+
+    username = serializers.HyperlinkedIdentityField(lookup_field='id', view_name='user-detail')
+
+    class Meta:
+
+        model = User
+
+        fields = ('id', 'username')
 
 
 
