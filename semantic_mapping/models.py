@@ -15,23 +15,24 @@ class Building(models.Model):
     address.
 
     """
-    name = models.CharField(_("Name"), max_length=200)
-    street = models.CharField(_("Street"), blank=True, max_length=250)
-    postal_code = models.CharField(_("Postal code"), blank=True,
+    name = models.CharField(max_length=200)
+    street = models.CharField(blank=True, max_length=250)
+    postal_code = models.CharField(blank=True,
                                    max_length=25)
-    city = models.CharField(_("City"), blank=True, max_length=100)
-    geom = models.PointField(_("Position"), srid=4326, blank=True,
+    city = models.CharField(blank=True, max_length=100)
+    geom = models.PointField(dim=2, srid=4326, blank=True,
                                  null=True)
+
+    objects = models.GeoManager()
+
+    def getGeometry(self):
+        return self.geom
 
     class Meta:
         verbose_name = _('Building')
         verbose_name_plural = _('Buildings')
 
-    def __unicode__(self):
-        return self.name
 
-    def get_absolute_url(self):
-        return reverse('semantic_mapping.views.api_building_list', args=[slugify[self.name]])
 
 
 class Floor(models.Model):
@@ -40,14 +41,11 @@ class Floor(models.Model):
     the map."""
     building = models.ForeignKey(Building, related_name='floors')
     level = models.IntegerField(max_length=5)
-    geom = models.PolygonField(srid=4326, null=True, blank=True)
+    geom = models.PolygonField(dim=2, srid=4326, null=True, blank=True)
     objects = models.GeoManager()
 
     def getGeometry(self):
-        return self.poly
-
-    def __unicode__(self):
-        return u'Level: %s' % self.level
+        return self.geom
 
 
 class Room(models.Model):
@@ -55,16 +53,9 @@ class Room(models.Model):
     We will be representing each Room with a polygon."""
     floor = models.ForeignKey(Floor, related_name='rooms')
     room = models.CharField(max_length=100, null=True)
-    geom = models.PolygonField(srid=4326, null=True, blank=True)
+    geom = models.PolygonField(dim=2, srid=4326, null=True, blank=True)
 
     objects = models.GeoManager()
-
-
-    def getGeometry(self):
-        return self.geom
-
-    def __unicode__(self):
-        return u'Room: %s' % self.room
 
 
 from south.modelsinspector import add_introspection_rules

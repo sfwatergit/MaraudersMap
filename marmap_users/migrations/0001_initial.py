@@ -27,18 +27,24 @@ class Migration(SchemaMigration):
         ))
         db.send_create_signal(u'marmap_users', ['LocationFix'])
 
+        # Adding unique constraint on 'LocationFix', fields ['building', 'epoch', 'floor', 'room', 'uuid']
+        db.create_unique(u'marmap_users_locationfix', ['building', 'epoch', 'floor', 'room', 'uuid'])
+
         # Adding model 'MobUserStatus'
         db.create_table(u'marmap_users_mobuserstatus', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.OneToOneField')(related_name='profile', unique=True, to=orm['auth.User'])),
+            ('user', self.gf('django.db.models.fields.related.OneToOneField')(related_name='status_of', unique=True, to=orm['auth.User'])),
             ('status', self.gf('model_utils.fields.StatusField')(default='online', max_length=100, no_check_for_status=True)),
-            ('location_fix', self.gf('django.db.models.fields.related.ForeignKey')(related_name='location_of', to=orm['marmap_users.LocationFix'])),
+            ('location_fix', self.gf('django.db.models.fields.related.ForeignKey')(related_name='of_user', to=orm['marmap_users.LocationFix'])),
             ('status_changed', self.gf('model_utils.fields.MonitorField')(default=datetime.datetime.now, monitor='status')),
         ))
         db.send_create_signal(u'marmap_users', ['MobUserStatus'])
 
 
     def backwards(self, orm):
+        # Removing unique constraint on 'LocationFix', fields ['building', 'epoch', 'floor', 'room', 'uuid']
+        db.delete_unique(u'marmap_users_locationfix', ['building', 'epoch', 'floor', 'room', 'uuid'])
+
         # Deleting model 'LocationFix'
         db.delete_table(u'marmap_users_locationfix')
 
@@ -84,7 +90,7 @@ class Migration(SchemaMigration):
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
         u'marmap_users.locationfix': {
-            'Meta': {'object_name': 'LocationFix'},
+            'Meta': {'unique_together': "(('building', 'epoch', 'floor', 'room', 'uuid'),)", 'object_name': 'LocationFix'},
             'building': ('django.db.models.fields.CharField', [], {'max_length': '32'}),
             'city': ('django.db.models.fields.CharField', [], {'max_length': '32'}),
             'confidence': ('django.db.models.fields.IntegerField', [], {'default': '0', 'null': 'True', 'blank': 'True'}),
@@ -103,10 +109,10 @@ class Migration(SchemaMigration):
         u'marmap_users.mobuserstatus': {
             'Meta': {'object_name': 'MobUserStatus'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'location_fix': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'location_of'", 'to': u"orm['marmap_users.LocationFix']"}),
+            'location_fix': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'of_user'", 'to': u"orm['marmap_users.LocationFix']"}),
             'status': ('model_utils.fields.StatusField', [], {'default': "'online'", 'max_length': '100', u'no_check_for_status': 'True'}),
             'status_changed': ('model_utils.fields.MonitorField', [], {'default': 'datetime.datetime.now', u'monitor': "'status'"}),
-            'user': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'profile'", 'unique': 'True', 'to': u"orm['auth.User']"})
+            'user': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'status_of'", 'unique': 'True', 'to': u"orm['auth.User']"})
         }
     }
 

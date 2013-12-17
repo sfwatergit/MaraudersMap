@@ -1,9 +1,8 @@
 {% extends "base.html" %}
-{% load leaflet_tags %}
 {% block head %}
-        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-{% leaflet_css %}
-    {% leaflet_js %}
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+    <script src="/sid-static/leaflet/leaflet.js"></script>
+    <link rel="stylesheet" href="/sid-static/leaflet/leaflet.css"/>
 {% endblock %}
 {% block filter_box %}
     <div id="filter-box">
@@ -38,25 +37,44 @@
 
 {% endblock %}
 {% block before_body_close %}
+	<div id="map" style="width: 600px; height: 400px"></div>
 
-        {% leaflet_map "main"  callback="main_map_init" %}
     <script>
-        function main_map_init(map, options)
-    {
+    var map = L.map('map').setView([37.874996, -122.258348], 18);
+    L.tileLayer('http://{s}.tile.cloudmade.com/{key}/22677/256/{z}/{x}/{y}.png', {
+			attribution: 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2012 CloudMade',
+			key: 'BC9A493B41014CAABB98F0471D759707'
+		}).addTo(map);
 
-        var dataurl = '{% url "rooms" %}';
-        // Download GeoJSON via Ajax
-        $.getJSON(dataurl, function (data) {
-            // Add GeoJSON layer
-            L.geoJson(data).addTo(map);
-        });
+    L.geoJSON([])
 
-        dataurl = '{% url "floors" %}';
-        $.getJSON(dataurl, function (data) {
-            // Add GeoJSON layer
-            L.geoJson(data).addTo(map);
-        });
 
-    }
+        function main_map_init(map, options) {
+
+
+            var dataurl = '{% url "rooms" %}';
+            // Download GeoJSON via Ajax
+            $.getJSON(dataurl, function (data) {
+                // Add GeoJSON layer
+                 L.geoJson(data, {onEachFeature:onEachFeature}
+                ).addTo(map);
+            });
+
+            dataurl = '{% url "floors" %}';
+            $.getJSON(dataurl, function (data) {
+                // Add GeoJSON layer
+                L.geoJson(data, {onEachFeature:onEachFeature}
+                ).addTo(map);
+            });
+
+            function onEachFeature(feature, layer) {
+                // does this feature have a property named popupContent?
+                if (feature.properties && feature.properties.model) {
+                    layer.bindPopup(feature.properties.model);
+                }
+            }
+
+        }
+
     </script>
 {% endblock %}

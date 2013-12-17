@@ -5,7 +5,7 @@ from model_utils import Choices, FieldTracker
 from model_utils.fields import StatusField, MonitorField
 from MaraudersMap import settings
 
-last_online_duration = getattr(settings, 'LAST_ONLINE_DURATION', 900)
+last_online_duration = getattr(settings, 'LAST_ONLINE_DURATION', 3600)
 
 class LocationFix(models.Model):
     """This is concrete location data updated directly from the relevant
@@ -56,7 +56,7 @@ class LocationFix(models.Model):
 
 class MobUserManager(models.Manager):
     def onlines(self):
-        now = datetime.now()
+        now = datetime.datetime.now()
         return MobUserStatus.objects.filter( \
             updated_on__gte=now - datetime.timedelta(seconds=last_online_duration) \
             )
@@ -81,7 +81,7 @@ class MobUserStatus(models.Model):
     objects = MobUserManager()
 
     def online(self):
-        now = datetime.now()
+        now = datetime.datetime.now()
         if (now - self.status_changed).seconds < last_online_duration:
             return True
         return False

@@ -1,4 +1,4 @@
-from django.conf.urls import patterns, url
+from django.conf.urls import patterns, url, include
 from rest_framework.routers import DefaultRouter
 from marmap_users.views import LocationViewSet, MobUserStatusViewSet, UserViewSet, OnlineUserView, onlineusers
 

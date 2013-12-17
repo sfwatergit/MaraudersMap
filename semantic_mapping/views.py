@@ -1,10 +1,9 @@
-from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from marmap_users.mixins import MultipleFieldLookupMixin
 
 from models import *
 from semantic_mapping.models import Building, Floor
-from serializers.map_serializer import *
+from semantic_mapping.map_serializer import *
 
 
 #GeoList
@@ -62,7 +61,7 @@ class BuildingFloorRooms(generics.ListCreateAPIView):
     def pre_save(self, obj):
         obj.building_id = self.kwargs['building']
 
-floorroom_list = BuildingFloors.as_view()
+#floorroom_list = BuildingFloors.as_view()
 
 
 class RoomDetails(generics.RetrieveUpdateDestroyAPIView):
@@ -112,13 +111,14 @@ floor_list = FloorList.as_view()
 
 
 class RoomList(MultipleFieldLookupMixin, generics.ListCreateAPIView):
-    model = Room
     serializer_class = RoomGeoSerializer
     pagination_serializer_class = PaginatedRoomGeoSerializer
     paginate_by_param = 'limit'
     paginate_by = 40
-    lookup_fields = ('name', 'level')
+
+    def get_queryset(self):
+        return Room.objects.filter(floor=self.request.kwargs['floor']).filter(building=self.request.kwargs['building'])
 
 
-room_list = RoomList.as_view()
+floorroom_list = RoomList.as_view()
 
