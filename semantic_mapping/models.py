@@ -52,10 +52,14 @@ class Room(models.Model):
     """A room may have many MobUsers.
     We will be representing each Room with a polygon."""
     floor = models.ForeignKey(Floor, related_name='rooms')
-    room = models.CharField(max_length=100, null=True)
+    room = models.CharField(_('Room'), max_length=100, null=True)
     geom = models.PolygonField(dim=2, srid=4326, null=True, blank=True)
 
     objects = models.GeoManager()
+
+    class Meta:
+        verbose_name = _('Room')
+        verbose_name_plural = _('Rooms')
 
 
 from south.modelsinspector import add_introspection_rules

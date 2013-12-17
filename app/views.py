@@ -1,3 +1,4 @@
+from django.contrib.sessions.serializers import JSONSerializer
 from django.http import HttpResponse
 from django.shortcuts import render_to_response, render
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
@@ -5,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from django.views.generic import TemplateView
 from djgeojson.serializers import Serializer as GeoJSONSerializer
 from requests import Response
+from marmap_users.models import MobUserStatus
 
 from semantic_mapping.models import *
 

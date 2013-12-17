@@ -28,17 +28,20 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
 class OnlineUserSerializer(serializers.HyperlinkedModelSerializer):
 
-    username = serializers.HyperlinkedIdentityField(lookup_field='id', view_name='user-detail')
+
+    room = serializers.RelatedField(source='status_of.location_fix.room')
 
     class Meta:
 
         model = User
 
-        fields = ('id', 'username')
+        fields = ('id', 'username', 'room')
 
 
 
 class LocationSerializer(serializers.HyperlinkedModelSerializer):
+
+    status = serializers.RelatedField(source='of_user.status')
 
     class Meta:
         lookup_field = 'id'
