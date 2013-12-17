@@ -2,7 +2,15 @@
 {% block head %}
     <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
     <script src="/sid-static/leaflet/leaflet.js"></script>
+    <script src="/sid-static/map/js/tilelayer.js"></script>
+    <script src="/sid-static/map/js/OSMBuildings-Leaflet.js"></script>
+    <script src="/sid-static/map/js/providers.js"></script>
+    <script src="/sid-static/map/js/Control.FullScreen.js"></script>
+
+
     <link rel="stylesheet" href="/sid-static/leaflet/leaflet.css"/>
+    <link rel="stylesheet" href="/sid-static/map/css/Control.FullScreen.css"/>
+
 {% endblock %}
 {% block filter_box %}
     <div id="filter-box">
@@ -15,21 +23,21 @@
         </div>
         <div id="search-results">
             <div id="errors"></div>
-            <div id="counties"></div>
-            <div id="places"></div>
+            <div id="buildings"></div>
+            <div id="rooms"></div>
         </div>
         <div id="filter-layers">
-            <label id="buildings_select" for="buildings">Buildings</label>
-            <select name="buildings">
+            <label id="buildings" for="buildings">Buildings</label>
+            <select id="buildings_select">
                 <option value="soda_hall" selected>Soda Hall</option>
                 <option value="cory_hall">Cory Hall</option>
                 <option value="etcheverry">Etcheverry</option>
             </select>
             <label for="floors">Floors</label>
             <select id="floors_select" name="floors">
-                <option value="floor1">1</option>
-                <option value="floor2">2</option>
-                <option value="floor3" selected>3</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3" selected>3</option>
             </select>
         </div>
 
@@ -37,44 +45,70 @@
 
 {% endblock %}
 {% block before_body_close %}
-	<div id="map" style="width: 600px; height: 400px"></div>
+    <div id="map" style="width: 600px; height: 400px"></div>
 
     <script>
-    var map = L.map('map').setView([37.874996, -122.258348], 18);
-    L.tileLayer('http://{s}.tile.cloudmade.com/{key}/22677/256/{z}/{x}/{y}.png', {
-			attribution: 'Map data &copy; 2011 OpenStreetMap contributors, Imagery &copy; 2012 CloudMade',
-			key: 'BC9A493B41014CAABB98F0471D759707'
-		}).addTo(map);
+        var map = L.map('map').setView([37.874996, -122.258348], 18);
 
-    L.geoJSON([])
+        L.tileLayer.provider('OpenStreetMap.DE').addTo(map);
+        var style = {
+            "clickable": true,
+            "color": "#00D",
+            "fillColor": "#00D",
+            "weight": 1.0,
+            "opacity": 0.3,
+            "fillOpacity": 0.2
+
+        };
+        L.control.fullscreen({
+            position: 'topleft',
+            title: 'Show me the fullscreen !'
+        }).addTo(map);
+
+        var hoverStyle = {
+            "fillOpacity": 0.5
+        };
+        var floor = $("#floors_select").find(":selected").val();
+ var building = $("#buildings_select").find(":selected").val();
+
+        var geojsonURL = "http://127.0.0.1:8000/"+building+"/"+floor+"/data.geojson";
 
 
-        function main_map_init(map, options) {
+        $("#filter-layers").change(function() {
+    location.reload(false);
+} );
+        var geojsonTileLayer = new L.TileLayer.GeoJSON(geojsonURL, {
+                    clipTiles: true,
+                    unique: function (feature) {
+                        return feature.id;
+                    }
+                }, {
+                    style: style,
 
-
-            var dataurl = '{% url "rooms" %}';
-            // Download GeoJSON via Ajax
-            $.getJSON(dataurl, function (data) {
-                // Add GeoJSON layer
-                 L.geoJson(data, {onEachFeature:onEachFeature}
-                ).addTo(map);
-            });
-
-            dataurl = '{% url "floors" %}';
-            $.getJSON(dataurl, function (data) {
-                // Add GeoJSON layer
-                L.geoJson(data, {onEachFeature:onEachFeature}
-                ).addTo(map);
-            });
-
-            function onEachFeature(feature, layer) {
-                // does this feature have a property named popupContent?
-                if (feature.properties && feature.properties.model) {
-                    layer.bindPopup(feature.properties.model);
+                    onEachFeature: function (feature, layer) {
+                        if (feature.properties) {
+                            var popupString = '<div class="popup">';
+                            for (var k in feature.properties) {
+                                var v = feature.properties[k];
+                                popupString += k + ': ' + v + '<br />';
+                            }
+                            popupString += '</div>';
+                            layer.bindPopup(popupString);
+                        }
+                        if (!(layer instanceof L.Point)) {
+                            layer.on('mouseover', function () {
+                                layer.setStyle(hoverStyle);
+                            });
+                            layer.on('mouseout', function () {
+                                layer.setStyle(style);
+                            });
+                        }
+                    }
                 }
-            }
+        );
+        map.addLayer(geojsonTileLayer);
 
-        }
+
 
     </script>
 {% endblock %}
