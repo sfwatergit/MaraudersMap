@@ -6,64 +6,93 @@
     <script src="/sid-static/map/js/OSMBuildings-Leaflet.js"></script>
     <script src="/sid-static/map/js/providers.js"></script>
     <script src="/sid-static/map/js/Control.FullScreen.js"></script>
+    <script src="/sid-static/bootstrap/bootstrap.js"></script>
+    <script src="/sid-static/leaflet/leaflet.ajax.js"></script>
+
 
 
     <link rel="stylesheet" href="/sid-static/leaflet/leaflet.css"/>
     <link rel="stylesheet" href="/sid-static/map/css/Control.FullScreen.css"/>
+    <link rel="stylesheet" href="/sid-static/bootstrap/bootstrap.css"/>
+    <link rel="stylesheet" href="/sid-static/bootstrap/bootstrap-theme.css"/>
+    <link rel="stylesheet" href="/sid-static/map/css/custom.css"/>
+
 
 {% endblock %}
 {% block filter_box %}
-    <div id="filter-box">
-        <div>
-            <form id="map-search" method="get">
-                <label for="search">Search</label>
-                <input type="text" id="search" name="search"/>
-                <input type="submit" value="Search" id="submit-map-search"/>
-            </form>
-        </div>
-        <div id="search-results">
-            <div id="errors"></div>
-            <div id="buildings"></div>
-            <div id="rooms"></div>
-        </div>
-        <div id="filter-layers">
-            <label id="buildings" for="buildings">Buildings</label>
-            <select id="buildings_select">
-                <option value="soda_hall" selected>Soda Hall</option>
-                <option value="cory_hall">Cory Hall</option>
-                <option value="etcheverry">Etcheverry</option>
-            </select>
-            <label for="floors">Floors</label>
-            <select id="floors_select" name="floors">
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3" selected>3</option>
-            </select>
-        </div>
+    <header class="navbar navbar-inverse navbar bs-docs-nav"  role="banner">
+        <div class="container">
+            <div class="navbar-header">
+                <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
+                    <span class="sr-only">Marauder's Map</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a href="#" class="navbar-brand">The Marauder's Map</a>
+            </div>
+            <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
+                <ul class="nav navbar-nav">
+                </ul>
 
-    </div>
+                <ul class="nav navbar-nav navbar-right">
+                       <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Locations <b class="caret"></b></a>
+            <ul class="dropdown-menu">
+                <li class="dropdown-header">Building</li>
+              <li><a id="#soda_hall">Soda Hall</a></li>
+              <li><a id="#cory_hall">Cory Hall</a></li>
+              <li><a id="#etcheverry">Etcheverry</a></li>
+              <li class="divider"></li>
+              <li class="dropdown-header">Floor</li>
+              <li><a id="#3">3</a></li>
+              <li><a id="#2">2</a></li>
+               <li><a id="#1">1</a></li>
+            </ul>
+          </li>
+               <li><form class="navbar-form navbar-left" role="search">
+  <div class="form-group">
+    <input type="text" class="form-control" placeholder="Rooms">
+  </div>
+  <button type="submit" class="btn btn-default">Submit</button>
+</form></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+
 
 {% endblock %}
 {% block before_body_close %}
-    <div id="map" style="width: 600px; height: 400px"></div>
+  <div id="map" style="width: 100%; height: 600px; margin-top:0"></div>
+<div class="row">
+        <div class="pull-right col-lg-12">
+        <br>
+          <p class="lead pull-right"><p >Created by Matt Weber, Sam Mansfield,
+            Hoang Nguyen, Sid Feygin, and Dung Thanh Pham / <em> UC Berkeley Fall 2013 EECS149/249 Final Project
+            and
+            Presentation.</em>
 
+            </p>
+
+        <br><br>
+        </div>
+    </div>
     <script>
-        var floor = $("#floors_select").find(":selected").val();
-        var building = $("#buildings_select").find(":selected").val();
+        var floor = "3"; //hard-coded for now... later, access dropdown .onClick w/ jQ
+        var building = "soda_hall"; //hard-coded
 
         var users;
-        var map = L.map('map').setView([37.87566, -122.258641], 18);
+        var map = L.map('map').setView([37.87566, -122.258641], 19);
 
-
-        L.tileLayer.provider('Stamen.TonerLite').addTo(map);
         var style = {
             "clickable": true,
-            "color": "#102CE3",
             "fillColor": "#102CE3",
-            "weight": 1.0,
-            "opacity": 0.5,
-            "fillOpacity": 0.5,
-            "maxZoom": 18
+            "weight": 1,
+            "opacity": 1,
+            "fillOpacity": 0.2,
+            "maxZoom": 19
 
         };
         L.control.fullscreen({
@@ -72,12 +101,14 @@
         }).addTo(map);
 
         var hoverStyle = {
-            "fillOpacity": 0.5,
-             "fillColor": "#EE1EE1"
+            "fillOpacity": 0.6,
+            "fillColor": "#102CE3",
+              "maxZoom":19
         };
         var userStyle = {
-            "fillOpacity": 0.7,
-            "fillColor": '#E3C710'
+            "fillOpacity": 0.3,
+            "fillColor": '#E3C710',
+            "maxZoom":19
         };
 
 
@@ -111,7 +142,6 @@
                                 }
                             }
 
-
                             popupString += '</div>';
                             layer.bindPopup(popupString);
                         }
@@ -132,9 +162,22 @@
                 "http://127.0.0.1:8000/users/online-users/" + building + "/" + floor + "?format=json",
                 function (json) {
                     users = json.results;
-                    map.addLayer(geojsonTileLayer);
+
                 }
-        );
+        ).done(function (users) {
+                    map.addLayer(geojsonTileLayer);
+                });
+        L.tileLayer.provider('Stamen.TonerLite').addTo(map);
+        var roomLegend = L.control({position: 'bottomright'});
+        var populationChangeLegend = L.control({position: 'bottomright'});
+
+        roomLegend.onAdd = function (map) {
+            var div = L.DomUtil.create('div', 'info legend');
+            div.innerHTML +=
+                    ' <select id="possible_rooms" multiple> <option value="321">321</option> <option ' +
+                            'value="330">330</option> <option value="304">304</option>  <option value="320">320</option> <option value="306">306</option></select>';
+            return div;
+        };
 
 
     </script>
