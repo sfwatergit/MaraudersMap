@@ -20,7 +20,7 @@
 
 {% endblock %}
 {% block filter_box %}
-    <header class="navbar navbar-inverse navbar bs-docs-nav"  role="banner">
+    <header class="navbar navbar-inverse navbar bs-docs-nav" role="banner">
         <div class="container">
             <div class="navbar-header">
                 <button class="navbar-toggle" type="button" data-toggle="collapse" data-target=".bs-navbar-collapse">
@@ -36,26 +36,28 @@
                 </ul>
 
                 <ul class="nav navbar-nav navbar-right">
-                       <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Locations <b class="caret"></b></a>
-            <ul class="dropdown-menu">
-                <li class="dropdown-header">Building</li>
-              <li><a id="#soda_hall">Soda Hall</a></li>
-              <li><a id="#cory_hall">Cory Hall</a></li>
-              <li><a id="#etcheverry">Etcheverry</a></li>
-              <li class="divider"></li>
-              <li class="dropdown-header">Floor</li>
-              <li><a id="#3">3</a></li>
-              <li><a id="#2">2</a></li>
-               <li><a id="#1">1</a></li>
-            </ul>
-          </li>
-               <li><form class="navbar-form navbar-left" role="search">
-  <div class="form-group">
-    <input type="text" class="form-control" placeholder="Rooms">
-  </div>
-  <button type="submit" class="btn btn-default">Submit</button>
-</form></li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">Locations <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li class="dropdown-header">Building</li>
+                            <li><a id="#soda_hall">Soda Hall</a></li>
+                            <li><a id="#cory_hall">Cory Hall</a></li>
+                            <li><a id="#etcheverry">Etcheverry</a></li>
+                            <li class="divider"></li>
+                            <li class="dropdown-header">Floor</li>
+                            <li><a id="#3">3</a></li>
+                            <li><a id="#2">2</a></li>
+                            <li><a id="#1">1</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <form class="navbar-form navbar-left" role="search">
+                            <div class="form-group">
+                                <input type="text" class="form-control" placeholder="Rooms">
+                            </div>
+                            <button type="submit" class="btn btn-default">Submit</button>
+                        </form>
+                    </li>
                 </ul>
             </nav>
         </div>
@@ -65,109 +67,155 @@
 
 {% endblock %}
 {% block before_body_close %}
-  <div id="map" style="width: 100%; height: 600px; margin-top:0"></div>
-<div class="row">
+    <div id="map" style="width: 100%; height: 600px; margin-top:0"></div>
+    <div class="row">
         <div class="pull-right col-lg-12">
-        <br>
-          <p class="lead pull-right"><p >Created by Matt Weber, Sam Mansfield,
-            Hoang Nguyen, Sid Feygin, and Dung Thanh Pham / <em> UC Berkeley Fall 2013 EECS149/249 Final Project
-            and
-            Presentation.</em>
+            <br>
+
+            <p class="lead pull-right">
+
+            <p>Created by Matt Weber, Sam Mansfield,
+                Hoang Nguyen, Sid Feygin, and Dung Thanh Pham / <em> UC Berkeley Fall 2013 EECS149/249 Final Project
+                    and
+                    Presentation.</em>
 
             </p>
 
-        <br><br>
+            <br><br>
         </div>
     </div>
     <script>
         var floor = "3"; //hard-coded for now... later, access dropdown .onClick w/ jQ
         var building = "soda_hall"; //hard-coded
 
-        var users;
-        var map = L.map('map').setView([37.87566, -122.258641], 19);
+        var data;
 
-        var style = {
-            "clickable": true,
-            "fillColor": "#102CE3",
-            "weight": 1,
-            "opacity": 1,
-            "fillOpacity": 0.2,
-            "maxZoom": 19
-
+        var layerStyle = {
+            "weight": 1.5,
+            "maxZoom": 20
         };
+
+        var userPresent = {
+            "fillOpacity": 0.3,
+            "color": "#ee2",
+            "weight": 1,
+            "maxZoom": 20,
+            "opacity": 0.3
+        };
+
+        var userPresentHover = {
+            "fillOpacity": 0.3,
+            "color": "#ef4",
+            "maxZoom": 20,
+            "weight": 1,
+            "opacity": 0.3
+        };
+
+        var userAbsent = {
+            "fillOpacity": 0.3,
+            "color": "#1ee",
+            "maxZoom": 20,
+            "weight": .5,
+            "opacity": 0.3
+        };
+
+        var userAbsentHover = {
+            "fillOpacity": 0.3,
+            "color": "#ee1",
+            "maxZoom": 20,
+            "weight": .5,
+            "opacity": 0.3
+        };
+
+        var geojsonURL = "http://127.0.0.1:8000/" + building + "/" + floor + "/data.geojson";
+
+        var map = L.map('map').setView([37.87566, -122.258641], 20);
+
+        var users;
+
+        $.getJSON("http://127.0.0.1:8000/users/online-users/" + building + "/" + floor + "?format=json",
+                function (json) {
+                    users = json.results;
+                    $.getJSON(geojsonURL, function (json) {
+                                data = json;
+                                L.geoJson(data, {
+                                            style: layerStyle,
+                                            onEachFeature: function onEachFeature(feature, layer) {
+                                                if (feature.properties) {
+
+                                                    var room = feature.properties['room'];
+
+                                                    var popupString =
+
+                                                    {
+                                                        roomString: '<div id="' + room + '" class="popup"> <br> Room:' + room + '<br>',
+                                                        userString: ''
+                                                    };
+
+                                                    layer.setStyle(user);
+
+                                                    for (var i = 0; i < users.length; i++) {
+                                                        var user = users[i];
+
+                                                        if (user['room'] === room) {
+                                                            layer.setStyle(userPresent);
+                                                            layer.on('mouseover', function () {
+                                                                layer.setStyle(userPresentHover);
+                                                            });
+                                                            layer.on('mouseout', function () {
+                                                                layer.setStyle(userPresent);
+                                                            });
+                                                            popupString['userString'] = 'Users: ' + user.username + "<br/>";
+                                                        }
+                                                    }
+
+                                                    layer.bindPopup(popupString['roomString'] + popupString['userString'] + '</div>');
+
+                                                    if (!(layer instanceof L.Point) && popupString['userString'] != '') {
+                                                        layer.setStyle(userAbsent);
+                                                        layer.on('mouseover', function () {
+                                                            layer.setStyle(userAbsentHover);
+                                                        });
+                                                        layer.on('mouseout', function () {
+                                                            layer.setStyle(userAbsent);
+                                                        });
+                                                    }
+                                                }
+                                            }
+
+                                        }
+                                ).addTo(map);
+                            }
+                    );
+                }
+        );
+
+        L.tileLayer.provider('Stamen.TonerLite').addTo(map);
+
         L.control.fullscreen({
             position: 'topleft',
             title: 'Show me the fullscreen !'
         }).addTo(map);
 
+        var style = {
+            "fillOpacity": 0.6,
+            "color": "#1d8cf8",
+            "maxZoom": 20,
+            "opacity": 0.5
+        };
+
         var hoverStyle = {
             "fillOpacity": 0.6,
-            "fillColor": "#102CE3",
-              "maxZoom":19
+            "color": "#1d8cf8",
+            "maxZoom": 20,
+            "opacity": 0.5
         };
-        var userStyle = {
-            "fillOpacity": 0.3,
-            "fillColor": '#E3C710',
-            "maxZoom":19
-        };
-
-
-        var geojsonURL = "http://127.0.0.1:8000/" + building + "/" + floor + "/data.geojson";
-
 
         $("#filter-layers").change(function () {
             location.reload(false);
         });
-        var geojsonTileLayer = new L.TileLayer.GeoJSON(geojsonURL, {
-                    clipTiles: true,
-                    unique: function (feature) {
-                        return feature.id;
-                    }
-                }, {
-                    style: style,
 
-                    onEachFeature: function (feature, layer) {
-                        if (feature.properties) {
-                            var room = feature.properties['room'];
-                            var popupString = '<div id=' + room + ' class="popup">';
-                            popupString += 'Room: ' + room + '<br /> Users: <br/>';
-                            layer.users = false;
-                            for (var i = 0; i < users.length; i++) {
-                                var user = users[i];
-                                if (user.room === room) {
-                                    layer.users = true;
-                                    popupString += user.username + "<br/>";
-                                    layer.setStyle(userStyle);
 
-                                }
-                            }
-
-                            popupString += '</div>';
-                            layer.bindPopup(popupString);
-                        }
-
-                        if (!(layer instanceof L.Point) && !layer.users) {
-                            layer.on('mouseover', function () {
-                                layer.setStyle(hoverStyle);
-                            });
-                            layer.on('mouseout', function () {
-                                layer.setStyle(style);
-                            });
-                        }
-
-                    }
-                }
-        );
-        var online_users = $.getJSON(
-                "http://127.0.0.1:8000/users/online-users/" + building + "/" + floor + "?format=json",
-                function (json) {
-                    users = json.results;
-
-                }
-        ).done(function (users) {
-                    map.addLayer(geojsonTileLayer);
-                });
-        L.tileLayer.provider('Stamen.TonerLite').addTo(map);
         var roomLegend = L.control({position: 'bottomright'});
         var populationChangeLegend = L.control({position: 'bottomright'});
 
