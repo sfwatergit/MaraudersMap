@@ -12,7 +12,7 @@ from semantic_mapping.models import *
 
 @csrf_exempt
 class MapView(TemplateView):
-    template_name = 'map.html'
+    template_name = 'map_DIL.html'
 
 @ensure_csrf_cookie
 def floor_layer(request, *args, **kwargs):
